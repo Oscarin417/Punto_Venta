@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Cajas
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        {% if empleado.rol == 'A' %}
+        <a href="{% url 'caja_crear' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Clave</th>
+                        <th>Nombre</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cajas %}
+                    <tr>
+                        <td>{{c.id}}</td>
+                        <td>{{c.clave}}</td>
+                        <td>{{c.nombre}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                {% if empleado.rol == 'A' %}
+                                <a href="{% url 'caja_editar' c.id %}" class='btn btn-warning'>
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <form action="{% url 'caja_eliminar' c.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type='submit'>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% if empleado.rol == 'E' and request.session.estado == 0 %}
+                                <a href="{% url 'caja_abrir' c.id %}" class="btn btn-success">
+                                    <i class="fas fa-box-open"></i>
+                                </a>
+                                {% endif %}
+                                {% if request.session.estado == 1 and request.session.caja == c.id %}
+                                <a href="{% url 'caja_cerrar' c.id %}" class="btn btn-danger">
+                                    <i class="fas fa-box"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

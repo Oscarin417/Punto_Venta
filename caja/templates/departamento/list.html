@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Departamentos
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <a href="{% url 'departamento_crear' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in departamentos %}
+                    <tr>
+                        <td>{{d.id}}</td>
+                        <td>{{d.nombre}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a href="{% url 'departamento_editar' d.id %}" class='btn btn-warning'>
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <form action="{% url 'departamento_eliminar' d.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type='submit'>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

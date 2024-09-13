@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Negocios
+{% endblock titulo %}
+
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <a href="{% url 'negocio_crear' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>RFC</th>
+                        <th>Razon social</th>
+                        <th>Telefono</th>
+                        <th>Celular</th>
+                        <th>Correo</th>
+                        <th>URL</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    {% for n in negocios %}
+                        <tr>
+                            <td>{{n.id}}</td>
+                            <td>{{n.nombre}}</td>
+                            <td>{{n.fiscal.rfc}}</td>
+                            <td>{{n.fiscal.rs}}</td>
+                            <td>{{n.contacto.telefono}}</td>
+                            <td>{{n.contacto.celular}}</td>
+                            <td>{{n.contacto.correo}}</td>
+                            <td>{{n.contacto.url}}</td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Basic example">
+                                    <a href="{% url 'negocio_editar' n.id %}" class='btn btn-warning'>
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <form action="{% url 'negocio_eliminar' n.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button class="btn btn-danger" type='submit'>
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                        
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

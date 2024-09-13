@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Ventas
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <a href="" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Caja</th>
+                        <th>Vendedor</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in ventas %}
+                    <tr>
+                        <td>{{v.id}}</td>
+                        <td>{{v.fecha}}</td>
+                        <td>{{v.caja.nombre}}</td>
+                        <td>{{v.empleado.nombre}}</td>
+                        <td>{{v.producto.nombre}}</td>
+                        <td>{{v.cantidad}}</td>
+                        <td>${{v.subtotal}}</td>
+                        <td>${{v.total}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a href="" class='btn btn-warning'>
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <form action="" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type='submit'>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

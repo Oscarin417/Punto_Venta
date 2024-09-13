@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block titulo %}
+Crear cliente
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    {{c_form|crispy}}
+                    {{con_form|crispy}}
+                    {{f_form|crispy}}
+                </div>
+                <div class="col-md-6">
+                    {{d_form|crispy}}
+                </div>
+            </div>
+            <button class='btn btn-success' type="submit">
+                <i class="fas fa-check"></i>
+            </button>
+            <a href="{% url 'cliente' %}" class="btn btn-danger">
+                <i class="fas fa-times"></i>
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock contenido %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Clientes
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <a href="{% url 'cliente_crear' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre(s)</th>
+                        <th>Apellidos</th>
+                        <th>Telefono</th>
+                        <th>Celular</th>
+                        <th>Correo</th>
+                        <th>RFC</th>
+                        <th>Razon social</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in clientes %}
+                    <tr>
+                        <td>{{c.id}}</td>
+                        <td>{{c.nombre}}</td>
+                        <td>{{c.apellidos}}</td>
+                        <td>{{c.contacto.telefono}}</td>
+                        <td>{{c.contacto.celular}}</td>
+                        <td>{{c.contacto.correo}}</td>
+                        <td>{{c.fiscal.rfc}}</td>
+                        <td>{{c.fiscal.rs}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a href="{% url 'cliente_editar' c.id %}" class='btn btn-warning'>
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <form action="{% url 'cliente_eliminar' c.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type='submit'>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Empleados
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <a href="{% url 'empleado_crear' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre(s)</th>
+                        <th>Apellidos</th>
+                        <th>Genero</th>
+                        <th>Rol</th>
+                        <th>Usuario</th>
+                        <th>Correo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in empleados %}
+                    <tr>
+                        <td>{{e.id}}</td>
+                        <td>{{e.nombre}}</td>
+                        <td>{{e.apellidos}}</td>
+                        <td>{{e.genero_c}}</td>
+                        <td>{{e.rol_c}}</td>
+                        <td>{{e.usuario.username}}</td>
+                        <td>{{e.contacto.correo}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a href="{% url 'empleado_editar' e.id %}" class='btn btn-warning'>
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <form action="{% url 'empleado_eliminar' e.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type='submit'>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

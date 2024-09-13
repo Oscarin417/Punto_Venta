@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Productos
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <a href="{% url 'producto_crear' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Marca</th>
+                        <th>Existencia</th>
+                        <th>Departamento</th>
+                        <th>Precio</th>
+                        <th>Existencia minima</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in productos %}
+                    <tr>
+                        <td>{{p.id}}</td>
+                        <td>{{p.nombre}}</td>
+                        <td>{{p.descripcion}}</td>
+                        <td>{{p.marca.nombre}}</td>
+                        <td>{{p.existencia}}</td>
+                        <td>{{p.departamento.nombre}}</td>
+                        <td>${{p.precio}}</td>
+                        <td>{{p.existencia_minima}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a href="{% url 'producto_editar' p.id %}" class='btn btn-warning'>
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <form action="{% url 'producto_eliminar' p.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type='submit'>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

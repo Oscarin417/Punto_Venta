@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block titulo %}
+Crear negocio
+{% endblock titulo %}
+{% block contenido %}
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{n_form|crispy}}
+                        {{c_form|crispy}}
+                    </div>
+                    <div class="col-md-6">
+                        {{f_form|crispy}}
+                        {{d_form.pais|as_crispy_field}}
+                        {{d_form.estado|as_crispy_field}}
+                        {{d_form.ciudad|as_crispy_field}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        {{d_form.colonia|as_crispy_field}}
+                        {{d_form.cp|as_crispy_field}}
+                        {{d_form.calle|as_crispy_field}}
+                        {{d_form.ne|as_crispy_field}}
+                        {{d_form.ni|as_crispy_field}}
+                    </div>
+                </div>
+                <button class='btn btn-success' type="submit">
+                    <i class="fas fa-check"></i>
+                </button>
+                <a href="{% url 'negocio' %}" class="btn btn-danger">
+                    <i class="fas fa-times"></i>
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock contenido %}
