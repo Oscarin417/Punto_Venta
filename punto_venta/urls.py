@@ -60,8 +60,8 @@ urlpatterns = [
     re_path(r'cajas/abrir/(?P<pk>\d)/$', abrir_caja, name='caja_abrir'),
     re_path(r'cajas/cerrar/(?P<pk>\d)/$', cerrar_caja, name='caja_cerrar'),
     path('ventas/', venta, name='venta'),
-    path('productos/copletar/', autocomplete_producto, name='autocomplete_producto'),
-    
+    path('productos/completar/', autocomplete_producto, name='autocomplete_producto'),
+    path('clientes/completar', autocomplete_cliente, name='autocomplete_cliente'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

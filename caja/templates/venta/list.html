@@ -3,57 +3,120 @@
 Ventas
 {% endblock titulo %}
 {% block contenido %}
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <a href="" class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-        </a>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table-bordered" id="dataTable" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Fecha</th>
-                        <th>Caja</th>
-                        <th>Vendedor</th>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Subtotal</th>
-                        <th>Total</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for v in ventas %}
-                    <tr>
-                        <td>{{v.id}}</td>
-                        <td>{{v.fecha}}</td>
-                        <td>{{v.caja.nombre}}</td>
-                        <td>{{v.empleado.nombre}}</td>
-                        <td>{{v.producto.nombre}}</td>
-                        <td>{{v.cantidad}}</td>
-                        <td>${{v.subtotal}}</td>
-                        <td>${{v.total}}</td>
-                        <td>
-                            <div class="btn-group" role="group" aria-label="Basic example">
-                                <a href="" class='btn btn-warning'>
-                                    <i class="fas fa-pencil-alt"></i>
-                                </a>
-                                <form action="" method="post">
-                                    {% csrf_token %}
-                                    <button class="btn btn-danger" type='submit'>
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %} 
-                </tbody>
-            </table>
+{% if not request.session.caja_abierta %}
+    <h2>Debe existir una caja abierta para poder realizar ventas</h2>
+{% else %}
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="form-group">
+                 <label for="cliente">Cliente</label>
+                 <input class="form-control" name="cliente" type="text" id="cliente">
+            </div>
+             <div class="form-group">
+                <label for="producto">Producto</label>
+                <input class="form-control" name="producto" type="text" id="producto">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table-bordered" width="100%" cellspacing="0">
+                   <thead>
+                       <tr>
+                            <th>Cantidad</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Descuento</th>
+                            <th>Opciones</th>
+                       </tr>
+                   </thead>
+                   <tbody id="listaProductos"></tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+    <button type="button" class="btn-success btn-lg btn-block" id="pagar">
+        Pagar
+    </button>
+{% endif %}
 {% endblock contenido %}
+{% block js %}
+<script>
+    $(function () {
+        $("#producto").autocomplete({
+            source: "{% url 'autocomplete_producto' %}",
+            minLength: 2,
+            select: function (event, ui) {
+                const id = ui.item.id;
+                const nombre = ui.item.label;
+                const precio = ui.item.precio;
+                const existencia = ui.item.existencia;
+
+                let producto = {
+                    id: id,
+                    nombre: nombre,
+                    precio: precio,
+                    existencia: existencia,
+                    cantidad: 1
+                }
+
+                agregarProducto(producto)
+            }
+        });
+    });
+
+    $(function () {
+        $("#cliente").autocomplete({
+            source: "{% url 'autocomplete_cliente' %}",
+            minLength: 2,
+            select: function(event, ui){
+                const id = ui.item.id;
+                const nombre = ui.item.label;
+
+                $("#cliente_id").val(id)
+            }
+        });
+    });
+    const agregarProducto = (producto)=>{
+        const fila = $('<tr></tr>');
+
+        fila.append(`<td><input type="number" value="${producto.cantidad}" min="1" max="${producto.existencia}" id="cantidad-"></td>`);
+        fila.append(`<td>${producto.nombre}</td>`);
+        fila.append(`<td id="precio">$${producto.precio}</td>`);
+        fila.append(`<td><input type="number" value="0" min="0" max="100" id="descuento-"></td>`);
+        fila.append(`<td><button class="btn btn-danger" id="eliminar">
+                      <i class="fas fa-trash-alt"></i>
+                    </button></td>`);
+
+        fila.find('#eliminar').click(function() {
+            const filaEliminada = $(this).closest('tr');
+            const cantidad = filaEliminada.find('input[id^="cantidad-"]').val();
+            const precio = filaEliminada.find('#precio').text();
+            const descuento = filaEliminada.find('input[id^="descuento-"]').val();
+
+            // Actualizar variables para calcular el nuevo total
+            const importe = parseFloat(cantidad) * parseFloat(precio);
+            const descuentoProducto = importe * (parseFloat(descuento) / 100);
+
+            filaEliminada.remove();
+
+            calcularTotal();
+        });
+
+        $('#listaProductos').append(fila);   
+    }
+
+    const calcularTotal = ()=> {
+        let descuento = $('#descuento-').val()
+        let cantidad = $('#cantidad-').val()
+        let precio = $(element).find("#precio").text()
+        let total = parseFloat(cantidad)*parseFloat(precio)
+        let totalFinal = 0
+
+        if descuento >0 {
+            totalFinal = parseFloat(total)-(parseFloat(descuento)*parseFloat(total)) 
+        } else {
+            totalFinal = total
+        }
+    }
+</script>
+{% endblock js %}

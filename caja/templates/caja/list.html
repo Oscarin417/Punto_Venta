@@ -40,16 +40,16 @@ Cajas
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-                                {% endif %}
-                                {% if empleado.rol == 'E' and request.session.estado == 0 %}
-                                <a href="{% url 'caja_abrir' c.id %}" class="btn btn-success">
-                                    <i class="fas fa-box-open"></i>
-                                </a>
-                                {% endif %}
-                                {% if request.session.estado == 1 and request.session.caja == c.id %}
+                                {% else %}
+                                {% if not request.session.caja_abierta %}
+                                     <a href="{% url 'caja_abrir' c.id %}" class="btn btn-success">
+                                        <i class="fas fa-box-open"></i>
+                                    </a>
+                                {% elif request.session.caja_abierta and request.session.caja_abierta == c.id %}
                                 <a href="{% url 'caja_cerrar' c.id %}" class="btn btn-danger">
                                     <i class="fas fa-box"></i>
                                 </a>
+                                {% endif %}
                                 {% endif %}
                             </div>
                         </td>

@@ -587,6 +587,7 @@ def abrir_caja(request, pk):
     empleado = Empleado.objects.get(usuario=request.user)
     form = MCajaForm(request.POST or None)
     context = {'form': form}
+    request.session['caja_abierta'] = 0
 
     if request.method == 'POST':
         try:
@@ -596,8 +597,7 @@ def abrir_caja(request, pk):
                 f.empleado = empleado
                 f.fecha = datetime.now()
                 f.movimiento = 'A'
-                request.session['estado'] = 1
-                request.session['caja'] = caja.id
+                request.session['caja_abierta'] = caja.id
                 f.save()
                 return redirect('caja')
             else:
@@ -622,11 +622,10 @@ def cerrar_caja(request, pk):
                 f.caja = caja
                 f.empleado = empleado
                 f.fecha = datetime.now()
-                f.movimiento = 'E'
+                f.movimiento = 'C'
                 f.monto_abierto = caja_abierta.monto_abierto
                 f.saldo_final = f.monto_cierre - f.monto_abierto
-                request.session['estado'] = 0
-                request.session['caja'] = caja.id
+                request.session['caja_abierta'] = 0
                 f.save()
                 return redirect('caja')
             else:
@@ -638,10 +637,7 @@ def cerrar_caja(request, pk):
 
 @login_required
 def venta(request):
-    ventas = Venta.objects.all()
-    context = {'ventas': ventas}
-
-    return render(request, 'venta/list.html', context)
+    return render(request, 'venta/list.html')
 
 def autocomplete_producto(request):
     if "term" in request.GET:
@@ -654,5 +650,15 @@ def autocomplete_producto(request):
                 'precio': p.precio,
                 'existencia': p.existencia
             }
+            titles.append(datos)
+        return JsonResponse(titles, safe=False)
+
+def autocomplete_cliente(request):
+    if 'term' in request.GET:
+        clientes = Cliente.objects.filter(nombre__icontains=request.GET.get('term'))
+        titles = list()
+        for cli in clientes:
+            datos = {'id': cli.id,
+                     'label': cli.nombre}
             titles.append(datos)
         return JsonResponse(titles, safe=False)
