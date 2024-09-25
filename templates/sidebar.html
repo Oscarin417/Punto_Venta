@@ -27,24 +27,28 @@
             <span>Negocios</span>
         </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'empleado' %}">
-            <i class="fas fa-users"></i>
-            <span>Empleados</span>
-        </a>
-    </li>
+    {% if empleado.rol == 'A' %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'empleado' %}">
+                <i class="fas fa-users"></i>
+                <span>Empleados</span>
+            </a>
+        </li>
+    {% endif %}
     <li class="nav-item">
         <a class="nav-link" href="{% url 'marca' %}">
             <i class="fas fa-registered"></i>
             <span>Marcas</span>
         </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'cliente' %}">
-            <i class="fas fa-users"></i>
-            <span>Clientes</span>
-        </a>
-    </li>
+   {% if empleado.rol == 'A' %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'cliente' %}">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </a>
+        </li>
+   {% endif %}
     <li class="nav-item">
         <a class="nav-link" href="{% url 'caja' %}">
             <i class="fas fa-cash-register"></i>

@@ -114,6 +114,7 @@ class Venta(models.Model):
     caja = models.ForeignKey(Caja, on_delete=models.SET_NULL, null=True)
     producto = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True)
     descuento = models.IntegerField(null=True, blank=True)
+    cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True)
 
 class MovimentoCaja(models.Model):
     fecha = models.DateTimeField()

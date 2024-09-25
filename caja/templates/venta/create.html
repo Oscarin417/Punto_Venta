@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block titulo %}
+Crear venta
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="mb-3">
+            <label for="cliente" class="form-label">Cliente</label>
+            <input type="text" name="cliente" id="cliente" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="producto" class="form-label">Producto</label>
+            <input type="text" name="producto" id="producto" class="form-control">
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row table-bordered">
+            <div class="col-sm-3">Producto</div>
+            <div class="col-sm-3">Cantidad</div>
+            <div class="col-sm-3">Precio</div>
+            <div class="col-sm-3">Descuento</div>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <div id="lista">
+                <input type="hidden" name="cliente" id="cliente_id">
+                {# <input type="hidden" name="producto_id" id="producto_id"> #}
+            </div>
+            <button type="submit" class="btn-success btn-lg btn-block">
+                Pagar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock contenido %}
+{% block js %}
+<script>
+     $(function () {
+        $("#producto").autocomplete({
+            source: "{% url 'autocomplete_producto' %}",
+            minLength: 1,
+            select: function (event, ui) {
+                const id = ui.item.id;
+                const nombre = ui.item.label;
+                const precio = ui.item.precio;
+                const existencia = ui.item.existencia;
+                $("#producto_id").val(id)
+
+                let producto = {
+                    id: id,
+                    nombre: nombre,
+                    precio: precio,
+                    existencia: existencia,
+                    cantidad: 1
+                }
+                agregarProducto(producto)
+            }
+        });
+    });
+
+    $(function () {
+        $("#cliente").autocomplete({
+            source: "{% url 'autocomplete_cliente' %}",
+            minLength: 2,
+            select: function(event, ui){
+                const id = ui.item.id;
+                const nombre = ui.item.label;
+
+                $("#cliente_id").val(id)
+            }
+        });
+    });
+
+    const agregarProducto = (producto)=> {
+        const fila = $('<div class="row table-bordered"></div>');
+
+        fila.append(`<input type="hidden" name="producto" id="producto_id" value="${producto.id}">`)
+        fila.append(`<div class="col-sm-3">${producto.nombre}</div>`);
+        fila.append(`<div class="col-sm-3"><input type="number" min="1" max="${producto.existencia}" id="cantidad-" name="cantidad"></div>`);
+        fila.append(`<div class=col-sm-3 id="precio">$${producto.precio}</div>`);
+        fila.append(`<div class="col-sm-3"><input type="number" min="0" max="100" id="descuento-" name="descuento"></div>`);
+
+         $('#lista').append(fila);
+    }
+</script>
+{% endblock js %}

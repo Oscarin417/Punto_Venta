@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block titulo %}
+Detalle de la venta 
+{% endblock titulo %}
+{% block contenido %}
+<div class="card shadow mb-4">
+	<div class="card-body">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="fecha" class="control-label">Fecha:</label>
+					<input type="datetime" class="form-control" name="fecha" value="{{venta.fecha}}" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="empleado" class="form-label">Vendedor:</label>
+					<input type="text" name="empleado" value="{{venta.vendedor.nombre}}" class="form-control" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="caja" class="form-label">Caja:</label>
+					<input type="text" name="caja" class="form-control" value="{{venta.caja.nombre}}" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label class="form-label" for="cliente">Cliente:</label>
+					<input type="text" name="cliente" class="form-control" value="{{venta.cliente.nombre}}" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="producto" class="form-label">Producto:</label>
+					<input type="text" name="producto" value="{{venta.producto.nombre}}" class="form-control" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="precio" class="form-label">Precio:</label>
+					<input type="number" name="precio" value="{{venta.producto.precio}}" class="form-control" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="cantidad" class="form-label">Cantidad:</label>
+					<input type="number" name="cantidad" value="{{venta.cantidad}}" class="form-control" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="descuento" class="form-label">Descuento</label>
+					<input type="number" name="descuento" value="{{venta.descuento}}" class="form-control" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="subtotal" class="form-label">Subtotal</label>
+					<input type="number" name="subtotal" value="{{venta.subtotal}}" class="form-control" disabled>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="mb-3">
+					<label for="total" class="form-label">Total</label>
+					<input type="number" name="total" value="{{venta.total}}" class="form-control" disabled>
+				</div>
+			</div>
+		</div>
+	</div>
+	<a href="{% url 'venta' %}" class="btn btn-success btn-lg btn-block">
+        Volver
+    </a>
+</div>
+{% endblock contenido %}

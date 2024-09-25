@@ -157,8 +157,9 @@ class VentaForm(forms.ModelForm):
     class Meta:
         model = Venta
         fields = [
-            'producto',
             'cantidad',
-            'descuento'
+            'descuento',
+            'cliente',
+            'producto'
         ]
         widgets = {'__all__'}

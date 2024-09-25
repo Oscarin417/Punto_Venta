@@ -4,7 +4,15 @@ from .forms import *
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+import decimal
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.lib.units import mm
+from reportlab.lib import colors
+import openpyxl
+from openpyxl.utils import get_column_letter
 
 # Create your views here.
 @login_required
@@ -609,7 +617,7 @@ def abrir_caja(request, pk):
 
 @login_required
 def cerrar_caja(request, pk):
-    caja = Caja.objects.get(pk=pk)
+    caja = Caja.objects.get(pk=request.session['caja_abierta'])
     caja_abierta = MovimentoCaja.objects.get(caja=caja, movimiento='A')
     empleado = Empleado.objects.get(usuario=request.user)
     form = MCajaForm(request.POST or None)
@@ -637,7 +645,40 @@ def cerrar_caja(request, pk):
 
 @login_required
 def venta(request):
-    return render(request, 'venta/list.html')
+    ventas = Venta.objects.all()
+    empleado = Empleado.objects.get(usuario=request.user)
+    context = {'ventas': ventas, 'empleado': empleado}
+    return render(request, 'venta/list.html', context)
+
+@login_required
+def venta_crear(request):
+    form = VentaForm(request.POST or None)
+    empleado = Empleado.objects.get(usuario=request.user)
+    context = {'form': form}
+    fecha = datetime.now()
+    fecha_formato = fecha.strftime("%d/%m/%Y %H:%M:%S")
+
+    if request.method == 'POST':
+        try:
+            if form.is_valid():
+                f = form.save(commit=False)
+                f.fecha = fecha_formato
+                f.caja_id = request.session['caja_abierta']
+                f.vendedor = empleado
+                f.subtotal = f.cantidad * f.producto.precio
+                if f.descuento is not None and f.descuento > 0:
+                    descuento_decimal = decimal.Decimal(f.descuento) / 100
+                    f.total = f.subtotal - (f.subtotal * descuento_decimal)
+                else:
+                    f.total = f.cantidad * f.producto.precio
+                f.save()
+                return redirect('venta')
+            else:
+                print(form.errors)
+        except Exception as e:
+            print(f'error: {e}')
+
+    return render(request, 'venta/create.html', context)
 
 def autocomplete_producto(request):
     if "term" in request.GET:
@@ -662,3 +703,151 @@ def autocomplete_cliente(request):
                      'label': cli.nombre}
             titles.append(datos)
         return JsonResponse(titles, safe=False)
+
+def sidebar(request):
+    empleado = Empleado.objects.get(usuario=request.user)
+    context = {'empleado': empleado}
+    return render(request, 'sidebar.html', context)
+
+@login_required
+def venta_detalle(request, pk):
+    venta = Venta.objects.get(pk=pk)
+    context = {'venta': venta}
+
+    return render(request, 'venta/detalle.html', context)
+
+@login_required
+def venta_pdf(request, pk):
+    venta = Venta.objects.get(pk=pk)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="venta{venta.id}.pdf"'
+
+    pdf = canvas.Canvas(response, pagesize=letter)
+
+    # Cabecera
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(50, 750, "Detalle de la Venta")
+    pdf.drawString(50, 730, f"Fecha: {venta.fecha}")
+    pdf.drawString(350, 730, f"Vendedor: {venta.vendedor.nombre}")
+    pdf.drawString(50, 710, f"Caja: {venta.caja.nombre}")
+    pdf.drawString(350, 710, f"Cliente: {venta.cliente.nombre}")
+
+    # Detalles del producto
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(50, 690, f"Producto: {venta.producto.nombre}")
+    pdf.drawString(200, 690, f"Precio: ${venta.producto.precio}")
+    pdf.drawString(50, 670, f"Cantidad: {venta.cantidad}")
+    if not venta.descuento:
+        pdf.drawString(50, 650, f"Descuento: 0%")
+    else:
+        pdf.drawString(50, 650, f"Descuento: {venta.descuento}%")
+
+
+    # Subtotal
+    pdf.drawString(50, 600, f"Subtotal: ${venta.subtotal}")
+
+    # Línea divisoria
+    pdf.line(50, 580, 550, 580)
+
+    # Total
+    pdf.drawString(50, 560, f"Total: ${venta.total}")
+
+    pdf.showPage()
+    pdf.save()
+    return response
+    
+@login_required
+def venta_ticket(request, pk):
+    venta = Venta.objects.get(pk=pk)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ticket_{venta.id}.pdf"'
+    
+    # Crear un canvas de ReportLab para el PDF
+    c = canvas.Canvas(response, pagesize=(80 * mm, 200 * mm))  # Tamaño aproximado de un ticket de compra
+
+    # Establecer algunas variables para la posición del texto
+    y_position = 190 * mm  # Posición inicial en Y
+    x_margin = 5 * mm  # Margen izquierdo
+
+    # Establecer el título del ticket
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(x_margin, y_position, "TICKET DE COMPRA")
+    
+    # Dibujar una línea divisoria
+    y_position -= 10
+    c.setStrokeColor(colors.black)
+    c.line(x_margin, y_position, 75 * mm, y_position)
+    
+    # Información de la venta
+    y_position -= 10
+    c.setFont("Helvetica", 8)
+    c.drawString(x_margin, y_position, f"Fecha: {venta.fecha.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    y_position -= 10
+    c.drawString(x_margin, y_position, f"Producto: {venta.producto.nombre}")
+    
+    y_position -= 10
+    c.drawString(x_margin, y_position, f"Precio: ${venta.producto.precio:.2f}")
+    
+    y_position -= 10
+    c.drawString(x_margin, y_position, f"Cantidad: {venta.cantidad}")
+    
+    if venta.descuento:
+        y_position -= 10
+        c.drawString(x_margin, y_position, f"Descuento: {venta.descuento}%")
+    
+    y_position -= 10
+    c.drawString(x_margin, y_position, f"Subtotal: ${venta.subtotal:.2f}")
+    
+    y_position -= 10
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(x_margin, y_position, f"TOTAL: ${venta.total:.2f}")
+
+    # Información final (ej. agradecimiento)
+    y_position -= 20
+    c.setFont("Helvetica", 8)
+    c.drawString(x_margin, y_position, "Gracias por su compra")
+
+    # Finalizar el PDF
+    c.showPage()
+    c.save()
+
+    return response
+
+@login_required
+def venta_excel(request):
+     # Crear un libro de trabajo y una hoja
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Ventas"
+
+    # Encabezados de las columnas
+    encabezados = ['Fecha', 'Subtotal', 'Total', 'Cantidad', 'Vendedor', 'Caja', 'Producto', 'Descuento', 'Cliente']
+    
+    # Escribir los encabezados en la primera fila
+    for col_num, encabezado in enumerate(encabezados, 1):
+        col_letra = get_column_letter(col_num)
+        ws[f'{col_letra}1'] = encabezado
+
+    # Obtener todos los registros de Venta
+    ventas = Venta.objects.all()
+
+    # Escribir los datos de las ventas
+    for row_num, venta in enumerate(ventas, 2):
+        ws[f'A{row_num}'] = venta.fecha.strftime('%Y-%m-%d %H:%M:%S')
+        ws[f'B{row_num}'] = float(venta.subtotal)
+        ws[f'C{row_num}'] = float(venta.total)
+        ws[f'D{row_num}'] = venta.cantidad
+        ws[f'E{row_num}'] = str(venta.vendedor.nombre) if venta.vendedor else 'N/A'
+        ws[f'F{row_num}'] = str(venta.caja.nombre) if venta.caja else 'N/A'
+        ws[f'G{row_num}'] = str(venta.producto.nombre) if venta.producto else 'N/A'
+        ws[f'H{row_num}'] = venta.descuento if venta.descuento is not None else '0'
+        ws[f'I{row_num}'] = str(venta.cliente.nombre) if venta.cliente else 'N/A'
+
+    # Generar la respuesta HTTP con el archivo adjunto
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=ventas.xlsx'
+    wb.save(response)
+    
+    return response

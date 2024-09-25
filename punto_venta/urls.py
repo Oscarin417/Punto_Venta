@@ -62,6 +62,11 @@ urlpatterns = [
     path('ventas/', venta, name='venta'),
     path('productos/completar/', autocomplete_producto, name='autocomplete_producto'),
     path('clientes/completar', autocomplete_cliente, name='autocomplete_cliente'),
+    path('ventas/crear/', venta_crear, name='venta_crear'),
+    re_path(r'ventas/detalle/(?P<pk>\d)/$', venta_detalle, name='venta_detalle'),
+    re_path(r'ventas/pdf/(?P<pk>\d)/$', venta_pdf, name='venta_pdf'),
+    re_path(r'ventas/ticket/(?P<pk>\d)/$', venta_ticket, name='venta_ticket'),   
+    path('ventas/excel/', venta_excel, name='venta_excel'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
